@@ -1,0 +1,83 @@
+body{
+    max-width: 1600px;
+    min-width: 600px;
+}
+.content,.footer,.navigation,.enter{
+    border: 1px solid #000;
+    width: 80%;
+    margin: 0 0 0 220px;
+}
+.login{
+    border: 1px solid #000;
+    width: 170px;
+    padding-right: 30px;
+    float: left;
+}
+.login h3{
+    margin: 5px 0 5px 0;
+}
+.login input[type=submit]{
+    margin-top: 10px;
+}
+.login input{
+    margin-bottom: 5px;
+}
+.footer{  
+    margin-top: 10px;
+    text-align: right;
+}
+.content{
+    height: 500px;
+}
+.enter{
+    text-align: right;
+    border: none;
+}
+.enter form{
+    margin-bottom: 10px;
+}
+.enter ul,.navigation ul{
+    list-style-type: none;
+    padding: 0;
+}
+.enter ul li{
+    display: inline-block;
+    margin-right: 5px;
+}
+.navigation{
+    border: none;
+}
+.navigation ul li{
+    display: inline-block;
+    width: 80px; 
+    height: 25px;
+    padding: 5px 0 0 20px;
+}
+.navigation ul li a,.enter ul li a{
+    text-decoration: none;
+}
+.navigation ul li a:hover,.enter ul li a:hover{
+    text-decoration: underline;
+}
+.content fieldset,.content form{
+    margin-top: 10px;
+    width: 160px;
+}
+.content ul li{
+    margin-bottom: 10px;
+}
+.content ul{
+    list-style-type: decimal;
+}
+.permission li {
+    width: 500px;
+}
+.permission li a{
+    float: right;
+}
+table td{
+    width: 100px;
+}
+table tr td.first{
+    width: 20px !important;
+}
