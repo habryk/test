@@ -1,13 +1,14 @@
 <?php
     session_start();
     include ("db.php");
+    include ("function.php");
     if($_COOKIE['auto'] == "yes"){        
         $_SESSION['id'] = $_COOKIE['id'];
         $_SESSION['login'] = $_COOKIE['login'];
         $_SESSION['password'] = $_COOKIE['password'];
-        $sessLog = "SELECT permission FROM users WHERE id=$_SESSION[id]";
-        $session = mysql_query($sessLog) or die(mysql_error());
-        $sessRow = mysql_fetch_row($session);
+        $sessLog = "SELECT permission FROM users WHERE id=?";
+        $sess_opt = array($_SESSION['id']);      
+        $sessRow = sql_query($sessLog,$sess_opt);
         $_SESSION['permission'] = $sessRow[0];
         }    
     include ("lang.inc.php");
@@ -28,9 +29,14 @@ include ("block/login.block.php");
 <div class="content">
     <p>
     <?php
-	$sql = "SELECT text FROM pages WHERE lang='$_COOKIE[lang]'";
-    $result = mysql_query($sql);
-    $myrow = mysql_fetch_array($result);
+	$sql = "SELECT text FROM pages WHERE lang=?";
+    $options = array($_SESSION['lang']);
+    
+    $myrow = sql_query ($sql,$options);
+    //$result = mysql_query($sql);
+    //$myrow = mysql_fetch_array($result);
+    //print_r ($myrow);
+   // echo  $_SESSION['permission'];
     echo $myrow['text'];
 ?>
     </p>    

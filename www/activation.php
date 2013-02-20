@@ -1,33 +1,38 @@
 <?php
     session_start();
     include ("db.php");
+    include ("function.php");
     if($_COOKIE['auto'] == "yes"){
-        $_SESSION['id'] = $_COOKIE['id'];
+         $_SESSION['id'] = $_COOKIE['id'];
         $_SESSION['login'] = $_COOKIE['login'];
         $_SESSION['password'] = $_COOKIE['password'];
-        $sessLog = "SELECT permission FROM users WHERE id=$_SESSION[id]";
-        $session = mysql_query($sessLog) or die(mysql_error());
-        $sessRow = mysql_fetch_row($session);
+        $sessLog = "SELECT permission FROM users WHERE id=?";
+        $sess_opt = array($_SESSION['id']);      
+        $sessRow = sql_query($sessLog,$sess_opt);
         $_SESSION['permission'] = $sessRow[0];
     }    
     include ("lang.inc.php");
     if (isset($_GET['login']) && $_GET['code']){
 	   $name = mysql_real_escape_string(base64_decode($_GET['login']));
-	   $sql = "SELECT id, permission, password FROM users WHERE login='$name' AND activation='0'";
-       $result = mysql_query($sql);
-       if (mysql_num_rows($result) > 0){
-       $myrow = mysql_fetch_array($result);
+	   $sql = "SELECT id, permission, password FROM users WHERE login=? AND activation=?";
+       $option = array($name,0);
+       $result_count = sql_query($sql,$option,false,true);
+       if ($result_count > 0){
+       $myrow = sql_query($sql,$option);
        $activation = md5($myrow['id']).strrev(md5($name));
        if ($activation == $_GET['code']){
-            $sql1 = "UPDATE users SET activation='1' WHERE id='$myrow[id]' AND login='$name'";
-            $result1 = mysql_query($sql1);
+            $sql1 = "UPDATE users SET activation=? WHERE id=? AND login=?";
+            $option1 = array(1,$myrow['id'],$name);
+            $result1 = sql_query($sql1,$option1,true);
             if ($result1 == true){
                 $_SESSION['id'] = $myrow['id'];
                 $_SESSION['login'] = $name;
                 $_SESSION['password'] = $myrow['password'];
                 $_SESSION['permission'] = $myrow['permission'];
                 $time = time();
-                mysql_query("UPDATE users SET lastDate='$time' WHERE id='$_SESSION[id]' AND login='$_SESSION[login]'")  or die(mysql_error());
+                $sql_date = "UPDATE users SET lastDate=? WHERE id=? AND login=?";
+                $option_date = array($time,$_SESSION['id'],$_SESSION['login']);
+                sql_query($sql_date,$option_date,true);
                 echo "<html><head><meta http-equiv='Refresh' content='3; URL=index.php'></head>".$items['pages']['activation']['success']."</html>";
                 }
        }

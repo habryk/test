@@ -1,13 +1,14 @@
 <?php
     session_start();
     include ("db.php");
+    include ("function.php");
     if($_COOKIE['auto'] == "yes"){
-        $_SESSION['id'] = $_COOKIE['id'];
+         $_SESSION['id'] = $_COOKIE['id'];
         $_SESSION['login'] = $_COOKIE['login'];
         $_SESSION['password'] = $_COOKIE['password'];
-        $sessLog = "SELECT permission FROM users WHERE id=$_SESSION[id]";
-        $session = mysql_query($sessLog) or die(mysql_error());
-        $sessRow = mysql_fetch_row($session);
+        $sessLog = "SELECT permission FROM users WHERE id=?";
+        $sess_opt = array($_SESSION['id']);      
+        $sessRow = sql_query($sessLog,$sess_opt);
         $_SESSION['permission'] = $sessRow[0];
     }    
     include ("lang.inc.php");
@@ -30,25 +31,40 @@ include ("block/login.block.php");
     if(!empty($_SESSION['id']) && !empty($_SESSION['login']) && !empty($_SESSION['password']) && $_SESSION['permission'] == 1){
     if(isset($_GET['id']) && is_numeric($_GET['id'])){
         if ($_GET['action'] == "del"){
-            $sql = "DELETE FROM users WHERE id=$_GET[id]";
-            $result = mysql_query($sql) or die(mysql_error());
+            $sql = "DELETE FROM users WHERE id=?";
+            $option = array($_GET['id']);
+            $result = sql_query($sql,$option,true);
             if($result){
-                echo "<html><head><meta http-equiv='Refresh' content='3; URL=permissions.php'></head>".$items['pages']['permisiions']['delSuccess']."</html>";
+                echo "<html><head><meta http-equiv='Refresh' content='3; URL=permissions.php'></head>".$items['pages']['permissions']['delSuccess']."</html>";
             }
         }
         else{
         $sql = "SELECT id,permission FROM permission";
-        $result = mysql_query($sql) or die(mysql_error());
-        $myrow = mysql_fetch_array($result);
+        $myrow = sql_query($sql); 
         ?>
         <form action='permissions.php?action=edit' method='POST'>
         <p><?php print $items['pages']['permissions']['choice'];?></p>
         <select name="permission">
-        <?php 
-        do{
-           printf("<option value='%s'>%s</option>",$myrow['id'],$myrow['permission']); 
+        <?php              
+          try{     
+                $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION );
+                $obj = $db->prepare($sql);
+                $obj->execute();
+                if ($obj->rowCount() > 0){
+                while($myrow = $obj->fetch()){
+                   printf("<option value='%s'>%s</option>",$myrow['id'],$myrow['permission']);              
+                }
+                }
+                
+            }
+        catch(PDOException $e){
+        $result = "Извините произошла ошибка в строке ";
+                $result .= $e->getLine();
+                $result .= " в файле ";
+                $result .= $e->getFile();
+                echo $result;
+                file_put_contents('PDOErrors.txt', $result."\n", FILE_APPEND);
         }
-        while($myrow = mysql_fetch_array($result));
         ?>
         </select><br>
         <input type="hidden" name="id" value="<?php print $_GET['id'];?>">
@@ -59,8 +75,9 @@ include ("block/login.block.php");
     }
     }
     elseif ($_SERVER['REQUEST_METHOD'] == "POST"){
-        $sql = "UPDATE users SET permission='$_POST[permission]' WHERE id=$_POST[id]";
-        $result = mysql_query($sql) or die(mysql_error());
+        $sql = "UPDATE users SET permission=? WHERE id=?";
+        $option = array($_POST['permission'],$_POST['id']);
+        $result = sql_query($sql,$option,true);
         if ($result){
             echo "<html><head><meta http-equiv='Refresh' content='3; URL=permissions.php'></head>".$items['pages']['permissions']['editSuccess']."</html>";
         }
@@ -68,16 +85,30 @@ include ("block/login.block.php");
     else{
     echo "<table>";
 	$sql = "SELECT u.id,u.login,p.permission FROM users u INNER JOIN permission p ON u.permission=p.id ORDER BY u.date";
-    $result = mysql_query($sql) or die(mysql_error());
-    $myrow = mysql_fetch_array($result);
     $i = 1;
-    do{
-    ?>
-    <tr><td class="first"><?php print $i.".";?></td><td><?php print $myrow['login']."</td><td>".$myrow['permission']."</td>";?><td><a href="<?php print $_SERVER['PHP_SELF']."?id=$myrow[id]";?>"><?php print $items['menu']['editUser'];?></a></td></tr>
-    <?php
-    $i++;        
-    }
-    while($myrow = mysql_fetch_array($result));
+    try{     
+                $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION );
+                $obj = $db->prepare($sql);
+                $obj->execute();
+                if ($obj->rowCount() > 0){
+                $myrow = $obj->fetch();
+                while($myrow = $obj->fetch()){
+                    ?>
+                   <tr><td class="first"><?php print $i.".";?></td><td><?php print $myrow['login']."</td><td>".$myrow['permission']."</td>";?><td><a href="<?php print $_SERVER['PHP_SELF']."?id=$myrow[id]";?>"><?php print $items['menu']['editUser'];?></a></td></tr>
+                    <?php
+                    $i++;              
+                }
+                }
+                
+            }
+        catch(PDOException $e){
+        $result = "Извините произошла ошибка в строке ";
+                $result .= $e->getLine();
+                $result .= " в файле ";
+                $result .= $e->getFile();
+                echo $result;
+                file_put_contents('PDOErrors.txt', $result."\n", FILE_APPEND);
+        }
     echo "</table>";
     }
     }   

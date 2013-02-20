@@ -9,10 +9,10 @@
             if (empty($_POST['login']) || empty($_POST['password'])) echo $items['pages']['login']['all_fields'];
             else{
                 $password = md5($_POST['password']);//шифруем пароль
-                $sql = "SELECT id,permission FROM users WHERE login='$_POST[login]' AND password='$password' AND activation='1'";
-                $result = mysql_query($sql);
-                $myrow = mysql_fetch_array($result);            
-                if (mysql_num_rows($result) > 0){
+                $sql = "SELECT id,permission FROM users WHERE login=? AND password=? AND activation=?";
+                $option = array($_POST['login'],$password,'1');
+                $myrow = sql_query($sql,$option);          
+                if ($myrow['id'] !== " " && $myrow['permission'] !== " "){
                     if ((int)$myrow['permission'] !== 4){
                     $_SESSION['id'] = $myrow['id'];
                     $_SESSION['login'] = $_POST['login'];
@@ -25,7 +25,9 @@
                     setcookie("auto", "yes", time()+99999);
                     }
                     $time = time();
-                    mysql_query("UPDATE users SET lastDate='$time' WHERE id='$_SESSION[id]' AND login='$_SESSION[login]'") or die(mysql_error());
+                    $sql = "UPDATE users SET lastDate=? WHERE id=? AND login=?";
+                    $option = array($time,$_SESSION['id'],$_SESSION['login']);
+                    sql_query($sql,$option,true);
                     echo "<html><head><meta http-equiv='Refresh' content='0; URL=index.php'></head></html>";
                 }
                 else echo $items['pages']['login']['blocked'];

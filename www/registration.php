@@ -8,7 +8,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <link rel="stylesheet" type="text/css" href="css/style.css">
-<title><?=$items['menu']['registration']?></title>
+<title><?php print $items['menu']['registration'];?></title>
 </head>
 <body>
 <?php
@@ -27,7 +27,6 @@ if (isset($_POST['form3'])){
         clearData($_POST["password1"]);
         clearData($_POST["password2"]);
         clearData($_POST["email"]);
-        echo $_POST["login"];
         //clearData($_POST["icq"],"i");
        //проверка ведденых данных 
         if (empty($_POST["login"]) || empty($_POST["password1"]) || empty($_POST["email"])) echo $items['pages']['registration']['fields_error'];
@@ -37,34 +36,38 @@ if (isset($_POST['form3'])){
     elseif (preg_match("[^.+@.+\..+$]",$_POST["email"]) == 0) echo $items['pages']['registration']['email_error'];
     //elseif (!empty ($_POST["icq"]) && !is_numeric($_POST["icq"])) echo $items['pages']['registration']['icq_error'];
     else{
-        $resultL = mysql_query("SELECT id FROM users WHERE login='$_POST[login]'");
-        $resultE = mysql_query("SELECT id FROM users WHERE email='$_POST[email]'");
-        $myrowL = mysql_fetch_array($resultL);
-        $myrowE = mysql_fetch_array($resultE);
-        if (!empty($myrowL["id"])) echo $items['pages']['registration']['log_exist'];
-        elseif (!empty($myrowE["id"])) echo $items['pages']['registration']['email_exist'];      
+        $sql_L = "SELECT id FROM users WHERE login=?";
+        $optionL = array($_POST['login']);
+        $sql_E = "SELECT id FROM users WHERE email=?";
+        $optionE = array($_POST['email']);
+        $myrowL = sql_query($sql_L,$optionL);
+        $myrowE = sql_query($sql_E,$optionE);
+        if (isset($myrowL["id"])) echo $items['pages']['registration']['log_exist'];
+        elseif (isset($myrowE["id"])) echo $items['pages']['registration']['email_exist'];      
         else{
         $password = md5($_POST["password1"]);//шифруем пароль.
         $date = time();
-        $sql = "INSERT INTO users(login,password,email,date) VALUES ('$_POST[login]','$password','$_POST[email]','$date')";
-        $result2 = mysql_query($sql);
+        $sql = "INSERT INTO users(login,password,email,date) VALUES (?,?,?,?)";
+        $option = array($_POST['login'],$password,$_POST['email'],$date);
+        $result2 = sql_query($sql,$option,true);
         if ($result2) {
-            $sql1 = "SELECT id FROM users WHERE login='$_POST[login]'";
-            $result_id = mysql_query($sql1);         
-        if (mysql_num_rows($result_id) > 0){
-        $myrow_id = mysql_fetch_array($result_id); 
-        $activation = md5($myrow_id['id']).strrev(md5($_POST["login"]));
-        $name = base64_encode($_POST["login"]);
-        $url = "http://test/activation.php?login=".$name."&code=".$activation;
-        $to = $_POST["email"];
-        $subject = $items['mail']['subject'];
-        $message =  $items['mail']['message'].$url;
-        
-        $success = mail($to,$subject,$message);
-        if ($success) {echo $items['mail']['success'];
-        echo "<html><head><meta http-equiv='Refresh' content='3; URL=index.php'></head></html>";
-        }
-        else echo $items['pages']['news']['update_error'];}
+            $sql1 = "SELECT id FROM users WHERE login=?";
+            $option1 = array($_POST['login']);
+            $result_count = sql_query($sql1,$option1,false,true);         
+            if ($result_count > 0){
+            $myrow_id = sql_query($sql1,$option1); 
+            $activation = md5($myrow_id['id']).strrev(md5($_POST["login"]));
+            $name = base64_encode($_POST["login"]);
+            $url = "http://test/activation.php?login=".$name."&code=".$activation;
+            $to = $_POST["email"];
+            $subject = $items['mail']['subject'];
+            $message =  $items['mail']['message'].$url;
+            
+            $success = mail($to,$subject,$message);
+            if ($success) {echo $items['mail']['success'];
+            echo "<html><head><meta http-equiv='Refresh' content='3; URL=index.php'></head></html>";
+            }
+            else echo $items['pages']['news']['update_error'];}
         }
         else echo mysql_error();
         }

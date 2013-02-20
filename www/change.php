@@ -6,9 +6,9 @@
         $_SESSION['id'] = $_COOKIE['id'];
         $_SESSION['login'] = $_COOKIE['login'];
         $_SESSION['password'] = $_COOKIE['password'];
-        $sessLog = "SELECT permission FROM users WHERE id=$_SESSION[id]";
-        $session = mysql_query($sessLog) or die(mysql_error());
-        $sessRow = mysql_fetch_row($session);
+        $sessLog = "SELECT permission FROM users WHERE id=?";
+        $sess_opt = array($_SESSION['id']);      
+        $sessRow = sql_query($sessLog,$sess_opt);
         $_SESSION['permission'] = $sessRow[0];
     }    
     include ("lang.inc.php");
@@ -35,8 +35,9 @@ if(!empty($_SESSION['id']) && !empty($_SESSION['login']) && !empty($_SESSION['pa
 	       $url = "images/avatars/".$_FILES['avatar']['name'];
         move_uploaded_file($_FILES['avatar']['tmp_name'],$url);
         $newurl = smallImage($url,150,150);
-        $fileSql = "UPDATE users SET avatar='$newurl' WHERE id=$_SESSION[id]";
-        $fileRes = mysql_query($fileSql) or die(mysql_query());
+        $fileSql = "UPDATE users SET avatar=? WHERE id=?";
+        $file_opt = array($newurl,$_SESSION['id']);
+        $fileRes = sql_query($fileSql,$file_opt,true);
         if ($fileRes){
         echo $items['pages']['change']['fileSuccess'];
         }
@@ -56,8 +57,9 @@ if(!empty($_SESSION['id']) && !empty($_SESSION['login']) && !empty($_SESSION['pa
     }
     $update = substr_replace($update, " ", -1,1); 
      if ($update != " "){
-        $sql = "UPDATE users SET $update WHERE id=$_SESSION[id]";
-        $result = mysql_query($sql) or die(mysql_error());
+        $sql = "UPDATE users SET $update WHERE id=?";
+        $option = array($_SESSION['id']);
+        $result = sql_query($sql,$option,true);
          if ($result) echo $items['pages']['change']['success'];
      }
      else echo $items['pages']['change']['error'];
@@ -66,9 +68,9 @@ if(!empty($_SESSION['id']) && !empty($_SESSION['login']) && !empty($_SESSION['pa
     else echo $items['pages']['change']['error'];
     }
     else{
-        $sql = "SELECT name,surname,email,skype FROM users WHERE id=$_SESSION[id]";
-        $result = mysql_query($sql) or die(mysql_error());
-        $myrow = mysql_fetch_assoc($result);
+        $sql = "SELECT name,surname,email,skype FROM users WHERE id=?";
+        $option = array($_SESSION['id']);
+        $myrow = sql_query($sql,$option);
 ?>
     <p>
         <form action="<?php print $_SERVER['PHP_SELF'];?>" method="POST" enctype="multipart/form-data">

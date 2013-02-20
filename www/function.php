@@ -49,4 +49,31 @@
             else {$newurl=$url;}
             return $newurl;
         }
+       function sql_query($sql,$options = array(),$return=false,$count=false){
+            try{
+                $db = new PDO("mysql:host=localhost;dbname=test", "habryk", "120493");
+                $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $obj = $db->prepare($sql);
+                $obj->execute($options);
+                if ($return == true){
+                    if (!$obj) {$myrow = false;}
+                    else {$myrow = true;}
+                }
+                elseif ($count == true){
+                    $myrow = $obj->rowCount();
+                }
+                else {
+                  $myrow = $obj->fetch();  
+                }                
+            }
+            catch(PDOException $e){
+                $result = "Извините произошла ошибка \"".$e->getMessage()."\" в строке ";
+                $result .= $e->getLine();
+                $result .= " в файле ";
+                $result .= $e->getFile();
+                echo $result;
+                 file_put_contents('PDOErrors.txt', $result."\n", FILE_APPEND);
+            }
+            return $myrow;
+       }
 ?>

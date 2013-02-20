@@ -1,14 +1,18 @@
 <div class="enter">
-<form action="<?php print $_SERVER['PHP_SELF']?>" method="POST">
-<?php print $render;?>
-<select name="lang" >
-  <option  value="en">en</option>
-  <option  value="ru">ru</option>
-  <option  value="ua">ua</option>
-</select>
-<input type="hidden" name="langid" value="1">
-<input type="submit" value="<?php print $value?>" >
-</form>
+<?php
+	if (preg_match("[.+\..+$]",$_SERVER['REQUEST_URI'])){
+	   if (preg_match("[.+\..+\?.+$]",$_SERVER['REQUEST_URI'])){
+	       $lang = "&lang=";
+	   }
+       else{
+        $lang = "?lang=";
+       }
+	}
+?>
+<p>
+<a href="<?php print $_SERVER['REQUEST_URI'].$lang."en";?>"><img src="images/eng.png" alt="english"></a>
+<a href="<?php print $_SERVER['REQUEST_URI'].$lang."ua";?>"><img src="images/ukr.png" alt="ukraine"></a>
+</p>
 <?php
 	if(!empty($_SESSION['login']) && !empty($_SESSION['password'])) echo $items['greeting'].", ".$_SESSION['login']."! <a href='logout.php'>(".$items['menu']['logout'].")</a>";
     else{

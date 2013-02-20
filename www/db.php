@@ -1,4 +1,7 @@
 <?php
-	mysql_connect("localhost","gekaman_93","120493") or die(mysql_error());
-    mysql_select_db("gekaman_93");
+define ("DB_HOST","localhost");
+define ("DB_NAME","test");
+define ("DB_USER","habryk");
+define ("DB_PASS","120493");
+    $db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME."", DB_USER, DB_PASS);
 ?>

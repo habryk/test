@@ -1,8 +1,8 @@
 <?php
-	$footer = "SELECT COUNT(*) FROM users WHERE activation='1'";
-    $footerres = mysql_query($footer); 
-    $footerrow = mysql_fetch_array($footerres);
+	$footer = "SELECT id FROM users WHERE activation=?";
+    $footer_opt = array('1');
+    $footerrow = sql_query($footer,$footer_opt,false,true);
 ?>
 <div class="footer">
-<p><?=$items['forms']['users'],$footerrow[0]?></p>
+<p><?php print $items['forms']['users'].$footerrow;?></p>
 </div>

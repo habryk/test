@@ -1,26 +1,48 @@
 <?php
     session_start();
     include ("db.php");	
+    include ("function.php");
     if($_COOKIE['auto'] == "yes"){
         $_SESSION['id'] = $_COOKIE['id'];
         $_SESSION['login'] = $_COOKIE['login'];
         $_SESSION['password'] = $_COOKIE['password'];
-        $sessLog = "SELECT permission FROM users WHERE id=$_SESSION[id]";
-        $session = mysql_query($sessLog) or die(mysql_error());
-        $sessRow = mysql_fetch_row($session);
+        $sessLog = "SELECT permission FROM users WHERE id=?";
+        $sess_opt = array($_SESSION['id']);      
+        $sessRow = sql_query($sessLog,$sess_opt);
         $_SESSION['permission'] = $sessRow[0];
     }     
-    include ("function.php");
     include ("lang.inc.php");	
     if (isset($_POST['form2'])) {
-        if (!empty($_POST['title']) && !empty($_POST['text'])){
-        clearData($_POST['title']);
-        clearData($_POST['text']);
+        if (!empty($_POST['title_en']) && !empty($_POST['text_en']) && !empty($_POST['title_ua']) && !empty($_POST['text_ua'])){
+        clearData($_POST['title_en']);
+        clearData($_POST['text_en']);
+        clearData($_POST['title_ua']);
+        clearData($_POST['text_ua']);
         $date = time();
-        $sql = "INSERT INTO news(title,author,text,date) VALUES ('$_POST[title]','$_SESSION[id]','$_POST[text]','$date')";
-        $result = mysql_query($sql);
-        if ($result) header("Location: news.php");
-        else echo(mysql_error());
+        $sql = "INSERT INTO news(title,author,text,lang,date) VALUES (?,?,?,?,?)";
+        $options_en = array($_POST['title_en'],$_SESSION['id'],$_POST['text_en'],$_POST['lang_en'],$date);
+        $options_ua = array($_POST['title_ua'],$_SESSION['id'],$_POST['text_ua'],$_POST['lang_ua'],$date);
+        try{
+            $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $db->beginTransaction();
+            $query1 = $db->prepare($sql);
+            $query1->execute($options_en);
+            $query2 = $db->prepare($sql);
+            $query1->execute($options_ua);
+            if (!$query1 || !$query2){
+                $db->rollBack();               
+            }
+            else{
+                $db->commit(); 
+            }
+        }
+        catch(PDOException $e){
+            $result = "Извините произошла ошибка \"".$e->getMessage()."\" в строке ";
+                $result .= $e->getLine();
+                $result .= " в файле ";
+                $result .= $e->getFile();
+                echo $result;
+        }
         }
         else echo $items['pages']['news']['fields_error'];
     }
@@ -29,8 +51,9 @@
             clearData($_POST['text']);
             clearData($_POST['title']);
             $date = time();
-            $sql = "UPDATE news SET title='$_POST[title]',text='$_POST[text]',date='$date' WHERE id=$_POST[id]";
-            $result = mysql_query($sql);
+            $sql = "UPDATE news SET title=?,text=?,date=? WHERE id=?";
+            $option = array($_POST['title'],$_POST['text'],$date,$_POST['id']);
+            $result = sql_query($sql,$option,true);
             if ($result){
             echo "<html><head><meta http-equiv='Refresh' content='3; URL=news.php?id=".$_POST['id']."'></head>".$items['pages']['news']['success_edit']."</html>";
             }
@@ -57,16 +80,26 @@ include ("block/login.block.php");
 if ($_GET['action'] == "add"){
 ?>
     <form action="news.php" method="POST">
-    <label><?php print $items['forms']['title'];?><input type="text" name="title" maxlength="50" ></label><br>
-    <label><?php print $items['forms']['text'];?><textarea name="text"></textarea></label>
+    <fieldset>
+    <legend>English</legend>
+    <label><?php print $items['forms']['title'];?><input type="text" name="title_en" maxlength="50" ></label><br>
+    <label><?php print $items['forms']['text'];?><textarea name="text_en"></textarea></label>
+    <input type="hidden" name="lang_en" value="en">
+    </fieldset>
+    <fieldset>
+    <legend>Ukraine</legend>
+    <label><?php print $items['forms']['title'];?><input type="text" name="title_ua" maxlength="50" ></label><br>
+    <label><?php print $items['forms']['text'];?><textarea name="text_ua"></textarea></label>  
+    <input type="hidden" name="lang_ua" value="ua">
+    </fieldset>
     <input type="submit" value="<?php print $items['button']['addnew'];?>" name="form2">
     </form>
 <?php
 }
 elseif($_GET['action'] == "edit" && isset($_GET['new'])){
-    $sql = "SELECT title,author,text FROM news WHERE id=$_GET[new]";
-    $result = mysql_query($sql);
-    $myrow = mysql_fetch_array($result);
+    $sql = "SELECT title,author,text FROM news WHERE id=?";
+    $option = array($_GET['new']);
+    $myrow = sql_query($sql,$option);
     if ($_SESSION['id'] == $myrow['author'] || $_SESSION['permission'] == 1){
 ?>
     <form action="news.php" method="POST">
@@ -82,9 +115,9 @@ else echo $items['pages']['news']['permission_error'];
 elseif (isset($_GET['id'])){
     if (!is_numeric($_GET['id'])) echo $items['pages']['news']['url_error'];
     else{
-        $sql = "SELECT n.title,n.author,u.login,n.text,n.date FROM news n INNER JOIN users u ON n.author=u.id WHERE n.id = '$_GET[id]'";
-        $result = mysql_query($sql);
-        $myrow = mysql_fetch_assoc($result);
+        $sql = "SELECT n.title,n.author,u.login,n.text,n.date FROM news n INNER JOIN users u ON n.author=u.id WHERE n.id = ?";
+        $option = array($_GET['id']);
+        $myrow = sql_query($sql,$option);
         $date = date("Y-m-d H:i:s",$myrow['date']);
 ?>
         <h1><?php print $myrow['title'];?></h1>
@@ -97,31 +130,40 @@ if(!empty($_SESSION['login']) && !empty($_SESSION['password']) && $_SESSION['per
     }
 }
 elseif($_GET['action'] == "del" && isset($_GET['new'])){
-    $sql = "DELETE FROM news WHERE id='$_GET[new]'";
-    $result = mysql_query($sql) or die (mysql_error());
+    $sql = "DELETE FROM news WHERE id=?";
+    $option = array($_GET['new']);
+    $result = sql_query($sql,$option,true);
     if ($result){
         echo $items['pages']['news']['success_delete'];
     }
 }
 	else{
-	   $sql = "SELECT id,title,text FROM news";
-       $result = mysql_query($sql);
-       $myrow = mysql_fetch_array($result);
-       echo "<ul>";
-       if(mysql_num_rows($result) > 0){      
-       do{
-        $text = stingcut($myrow['text'],150);
-         printf("<li><h2><a href='news.php?id=%s'>%s</a></h2><p>%s</p><a href='news.php?id=%s'>%s</a></li>",$myrow['id'],$myrow['title'],$text,$myrow['id'],$items['menu']['more']);
+	   $sql = "SELECT id,title,text FROM news WHERE lang=?";
+       $options = array($_SESSION['lang']); 
+       try{     
+                $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION );
+                $obj = $db->prepare($sql);
+                $obj->execute($options);
+                if ($obj->rowCount() > 0){
+                    echo "<ul>";
+                while($myrow = $obj->fetch(PDO::FETCH_ASSOC)){
+                    $text = stingcut($myrow['text'],150);
+                    printf("<li><h2><a href='news.php?id=%s'>%s</a></h2><p>%s</p><a href='news.php?id=%s'>%s</a></li>",$myrow['id'],$myrow['title'],$text,$myrow['id'],$items['menu']['more']);               
+                }
+                echo "</ul>";
+                }
+                else{
+                echo $items['pages']['news']['news_error'];
+                }
        }
-       while($myrow = mysql_fetch_array($result));
-      
-       echo "</ul>";
+       catch(PDOException $e){
+        $result = "Извините произошла ошибка в строке ";
+                $result .= $e->getLine();
+                $result .= " в файле ";
+                $result .= $e->getFile();
+                echo $result;
+                file_put_contents('PDOErrors.txt', $result."\n", FILE_APPEND);
        }
-       else{
-        echo $items['pages']['news']['news_error'];
-       }
-       
-       
        if(!empty($_SESSION['login']) && !empty($_SESSION['password']) && $_SESSION['permission'] == 1 || $_SESSION['permission'] == 2) echo "<a href='news.php?action=add'>".$items['menu']['addnew']."</a>";
        }
 
