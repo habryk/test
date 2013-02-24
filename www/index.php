@@ -17,7 +17,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <link rel="stylesheet" type="text/css" href="css/style.css">
-<title><?=$items['menu']['home']?></title>
+<title><?php print $items['menu']['home'];?></title>
 </head>
 <body>
 <?php
@@ -33,15 +33,12 @@ include ("block/login.block.php");
     $options = array($_SESSION['lang']);
     
     $myrow = sql_query ($sql,$options);
-    //$result = mysql_query($sql);
-    //$myrow = mysql_fetch_array($result);
-    //print_r ($myrow);
-   // echo  $_SESSION['permission'];
     echo $myrow['text'];
 ?>
     </p>    
 </div>
 <?php
+    include ("block/lang.block.php");
 	include("footer.inc.php");
 ?>
 </body>

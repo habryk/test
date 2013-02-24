@@ -7,6 +7,12 @@ body{
     width: 80%;
     margin: 0 0 0 220px;
 }
+.lang_change{
+    border: 1px solid #000;
+    width: 94%;
+    margin-left:3%;
+    margin-top: 10px;
+}
 .login{
     border: 1px solid #000;
     width: 170px;
@@ -62,6 +68,14 @@ body{
 .content fieldset,.content form{
     margin-top: 10px;
     width: 160px;
+    display: inline-block;
+}
+form.lang{
+    width: 100%;
+}
+form.lang fieldset{
+    width: 250px;
+    display: inline-block;
 }
 .content ul li{
     margin-bottom: 10px;

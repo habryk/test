@@ -17,7 +17,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <link rel="stylesheet" type="text/css" href="css/style.css">
-<title><?=$items['menu']['home']?></title>
+<title><?php print $items['menu']['home']; ?></title>
 </head>
 <body>
 <?php
@@ -39,17 +39,17 @@ if(!empty($_SESSION['id']) && !empty($_SESSION['login']) && !empty($_SESSION['pa
         $file_opt = array($newurl,$_SESSION['id']);
         $fileRes = sql_query($fileSql,$file_opt,true);
         if ($fileRes){
-        echo $items['pages']['change']['fileSuccess'];
+        echo $items['pages']['change']['fileSuccess_c'];
         }
        }
-       else echo $items['pages']['change']['fileSize'];
+       else echo $items['pages']['change']['fileSize_c'];
        }
-       if (!preg_match("[^.+@.+\..+$]",$_POST["email"]) && !empty($_POST["email"])){unset($_POST["email"]); echo $items['pages']['registration']['email_error'];}
-       if (!empty($_POST['name']) || !empty($_POST['surname']) || !empty($_POST['skype']) || !empty($_POST['avatar']) || !empty($_POST['email'])){
-	   clearData($_POST['name']);
+       if (!preg_match("[^.+@.+\..+$]",$_POST["email"]) && !empty($_POST["email"])){unset($_POST["email"]); echo $items['pages']['registration']['email_error_c'];}
+       clearData($_POST['name']);
        clearData($_POST['surname']);
        clearData($_POST['skype']);
        clearData($_POST['email']);
+       if (!empty($_POST['name']) || !empty($_POST['surname']) || !empty($_POST['skype']) || !empty($_POST['avatar']) || !empty($_POST['email'])){	   
        foreach($_POST as $k => $v){
         if ($v !== "") {
             $update .= "$k='".$v."'," ;            
@@ -60,12 +60,12 @@ if(!empty($_SESSION['id']) && !empty($_SESSION['login']) && !empty($_SESSION['pa
         $sql = "UPDATE users SET $update WHERE id=?";
         $option = array($_SESSION['id']);
         $result = sql_query($sql,$option,true);
-         if ($result) echo $items['pages']['change']['success'];
+         if ($result) echo $items['pages']['change']['success_c'];
      }
-     else echo $items['pages']['change']['error'];
+     else echo $items['pages']['change']['error_c'];
 	}
     elseif (isset($url)){}
-    else echo $items['pages']['change']['error'];
+    else echo $items['pages']['change']['error_c'];
     }
     else{
         $sql = "SELECT name,surname,email,skype FROM users WHERE id=?";
@@ -74,22 +74,23 @@ if(!empty($_SESSION['id']) && !empty($_SESSION['login']) && !empty($_SESSION['pa
 ?>
     <p>
         <form action="<?php print $_SERVER['PHP_SELF'];?>" method="POST" enctype="multipart/form-data">
-        <label><?php print $items['forms']['avatar'];?><input type="file" name="avatar" accept= "image/*"></label>
-        <label><input type="checkbox" name="avatar" value="images/avatars/default_avatar.png"><?php print $items['forms']['default_img'];?></label>
-        <label><?php print $items['forms']['name'];?><input type="text" name="name" maxlength="100" value="<?php print $myrow['name'];?>"></label>
-        <label><?php print $items['forms']['surname'];?><input type="text" name="surname" maxlength="100" value="<?php print $myrow['surname'];?>"></label>
-        <label>E-mail: <input type="text" name="email" maxlength="100" value="<?php print $myrow['email'];?>"></label>
-        <label>Skype: <input type="text" name="skype" maxlength="100" value="<?php print $myrow['skype'];?>"></label>
-        <input type="submit" value="<?php print $items['button']['edit'];?>">
+        <label><?php print $items['pages']['change']['forms']['avatar_c'];?><input type="file" name="avatar" accept= "image/*"></label>
+        <label><input type="checkbox" name="avatar" value="images/avatars/default_avatar.png"><?php print $items['pages']['change']['forms']['default_img_c'];?></label>
+        <label><?php print $items['pages']['change']['forms']['name_c'];?><input type="text" name="name" maxlength="100" value="<?php print $myrow['name'];?>"></label>
+        <label><?php print $items['pages']['change']['forms']['surname_c'];?><input type="text" name="surname" maxlength="100" value="<?php print $myrow['surname'];?>"></label>
+        <label><?php print $items['pages']['change']['forms']['email_c'];?><input type="text" name="email" maxlength="100" value="<?php print $myrow['email'];?>"></label>
+        <label><?php print $items['pages']['change']['forms']['skype_c'];?><input type="text" name="skype" maxlength="100" value="<?php print $myrow['skype'];?>"></label>
+        <input type="submit" value="<?php print $items['pages']['change']['forms']['edit_button_c'];?>">
         </form>
     </p> 
     <?php
 	}
     }
-    else echo $items['pages']['user']['error'];
+    else echo $items['pages']['user']['error_c'];
 ?>   
 </div>
 <?php
+    include ("block/lang.block.php");
 	include("footer.inc.php");
 ?>
 </body>

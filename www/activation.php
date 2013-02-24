@@ -13,7 +13,7 @@
     }    
     include ("lang.inc.php");
     if (isset($_GET['login']) && $_GET['code']){
-	   $name = mysql_real_escape_string(base64_decode($_GET['login']));
+	   $name = base64_decode($_GET['login']);
 	   $sql = "SELECT id, permission, password FROM users WHERE login=? AND activation=?";
        $option = array($name,0);
        $result_count = sql_query($sql,$option,false,true);

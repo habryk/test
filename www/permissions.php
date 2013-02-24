@@ -35,7 +35,7 @@ include ("block/login.block.php");
             $option = array($_GET['id']);
             $result = sql_query($sql,$option,true);
             if($result){
-                echo "<html><head><meta http-equiv='Refresh' content='3; URL=permissions.php'></head>".$items['pages']['permissions']['delSuccess']."</html>";
+                echo "<html><head><meta http-equiv='Refresh' content='3; URL=permissions.php'></head>".$items['pages']['permissions']['delSuccess_p']."</html>";
             }
         }
         else{
@@ -43,7 +43,7 @@ include ("block/login.block.php");
         $myrow = sql_query($sql); 
         ?>
         <form action='permissions.php?action=edit' method='POST'>
-        <p><?php print $items['pages']['permissions']['choice'];?></p>
+        <p><?php print $items['pages']['permissions']['forms']['choice_p'];?></p>
         <select name="permission">
         <?php              
           try{     
@@ -68,9 +68,9 @@ include ("block/login.block.php");
         ?>
         </select><br>
         <input type="hidden" name="id" value="<?php print $_GET['id'];?>">
-        <input type='submit' value='<?php print $items['button']['edit'];?>'>
-        </form>
-        <a href="<?php print $_SERVER['REQUEST_URI']."&action=del";?>"><?php print $items['menu']['delUser'];?></a>
+        <input type='submit' value='<?php print $items['pages']['permissions']['forms']['edit_button_p'];?>'>
+        </form><br>
+        <a href="<?php print $_SERVER['REQUEST_URI']."&action=del";?>"><?php print $items['pages']['permissions']['forms']['del_user_p'];?></a>
     <?php
     }
     }
@@ -79,7 +79,7 @@ include ("block/login.block.php");
         $option = array($_POST['permission'],$_POST['id']);
         $result = sql_query($sql,$option,true);
         if ($result){
-            echo "<html><head><meta http-equiv='Refresh' content='3; URL=permissions.php'></head>".$items['pages']['permissions']['editSuccess']."</html>";
+            echo "<html><head><meta http-equiv='Refresh' content='3; URL=permissions.php'></head>".$items['pages']['permissions']['editSuccess_p']."</html>";
         }
     }
     else{
@@ -94,7 +94,7 @@ include ("block/login.block.php");
                 $myrow = $obj->fetch();
                 while($myrow = $obj->fetch()){
                     ?>
-                   <tr><td class="first"><?php print $i.".";?></td><td><?php print $myrow['login']."</td><td>".$myrow['permission']."</td>";?><td><a href="<?php print $_SERVER['PHP_SELF']."?id=$myrow[id]";?>"><?php print $items['menu']['editUser'];?></a></td></tr>
+                   <tr><td class="first"><?php print $i.".";?></td><td><?php print $myrow['login']."</td><td>".$myrow['permission']."</td>";?><td><a href="<?php print $_SERVER['PHP_SELF']."?id=$myrow[id]";?>"><?php print $items['pages']['permissions']['forms']['edit_user_p'];?></a></td></tr>
                     <?php
                     $i++;              
                 }
@@ -112,10 +112,11 @@ include ("block/login.block.php");
     echo "</table>";
     }
     }   
-    else echo $items['pages']['permisiions']['error'];
+    else echo $items['pages']['permisiions']['error_p'];
 ?>   
 </div>
 <?php
+    include ("block/lang.block.php");
 	include("footer.inc.php");
 ?>
 </body>

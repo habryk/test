@@ -17,7 +17,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <link rel="stylesheet" type="text/css" href="css/style.css">
-<title><?=$items['menu']['user']?></title>
+<title><?php print $items['menu']['user'];?></title>
 </head>
 <body>
 <?php
@@ -45,27 +45,28 @@ include ("block/login.block.php");
         ?>
         <h4><?php print $myrow['surname']." ".$myrow['name'];?></h4>
         <img src="<?php print $myrow['avatar'];?>" >        
-        <p>E-mail: <?php print $myrow['email'];?></p>
+        <p><?php print $items['pages']['user']['forms']['email_u'].$myrow['email'];?></p>
         
        <?php
        if (!empty($myrow['skype'])){
-	       print "<p>Skype: ".$myrow['skype']."</p>";
+	       print "<p>".$items['pages']['user']['forms']['skype_u'].$myrow['skype']."</p>";
            }
         ?>
         
-        <p><?php print $items['pages']['user']['registration'].date("Y-m-d H:i:s",$myrow['date']);?></p>
-        <p><?php print $items['pages']['user']['lastDate'].date("Y-m-d H:i:s",$myrow['lastDate']);?></p>
+        <p><?php print $items['pages']['user']['forms']['registration_u'].date("Y-m-d H:i:s",$myrow['date']);?></p>
+        <p><?php print $items['pages']['user']['forms']['lastDate_u'].date("Y-m-d H:i:s",$myrow['lastDate']);?></p>
         <?php
     if(!empty($_SESSION['login']) && !empty($_SESSION['password']) && !empty($_SESSION['id'])){
-        echo "<a href='change.php'>".$items['pages']['user']['edit']."</a> / <a href='".$_SERVER[PHP_SELF]."?action=delete'>".$items['pages']['user']['delete']."</a>";
+        echo "<a href='change.php'>".$items['pages']['user']['forms']['edit_u']."</a> / <a href='".$_SERVER[PHP_SELF]."?action=delete'>".$items['pages']['user']['forms']['delete_u']."</a>";
     }
     }
     }
-    else echo $items['pages']['user']['error'];
+    else echo $items['pages']['user']['error_u'];
     ?>
     </p>    
 </div>
 <?php
+    include ("block/lang.block.php");
 	include("footer.inc.php");
 ?>
 </body>

@@ -6,13 +6,13 @@
     if (isset($_POST['form1'])){
             clearData($_POST['login']);
             clearData($_POST['password']);
-            if (empty($_POST['login']) || empty($_POST['password'])) echo $items['pages']['login']['all_fields'];
+            if (empty($_POST['login']) || empty($_POST['password'])) echo $items['pages']['login']['all_fields_l'];
             else{
                 $password = md5($_POST['password']);//шифруем пароль
                 $sql = "SELECT id,permission FROM users WHERE login=? AND password=? AND activation=?";
                 $option = array($_POST['login'],$password,'1');
                 $myrow = sql_query($sql,$option);          
-                if ($myrow['id'] !== " " && $myrow['permission'] !== " "){
+                if (isset($myrow['id']) && isset($myrow['permission'])){
                     if ((int)$myrow['permission'] !== 4){
                     $_SESSION['id'] = $myrow['id'];
                     $_SESSION['login'] = $_POST['login'];
@@ -30,9 +30,9 @@
                     sql_query($sql,$option,true);
                     echo "<html><head><meta http-equiv='Refresh' content='0; URL=index.php'></head></html>";
                 }
-                else echo $items['pages']['login']['blocked'];
+                else echo $items['pages']['login']['blocked_l'];
                 }
-                else echo $items['pages']['login']['pass_error'];
+                else echo $items['pages']['login']['pass_error_l'];
             }
         }
     	  
@@ -61,21 +61,22 @@ include ("block/login.block.php");
 <div class="content">
 <?php
 	if (!empty($_SESSION['login']) && !empty($_SESSION['password'])){
-    echo $items['pages']['login']['enter_error'];
+    echo $items['pages']['login']['enter_error_l'];
 }
 else{   
 ?>
 <form action="<?=$_SERVER['PHP_SELF']?>" method="POST">
-<label><?php print $items['forms']['login'];?><input type="text" name="login"></label>
-<label><?php print $items['forms']['password1'];?><input type="password" name="password"></label>
-<input type="checkbox" name="auto" value="1"><?php print $items['forms']['auto'];?><br>
-<input type="submit" value="<?php print $items['button']['login'];?>" name="form1">
+<label><?php print $items['pages']['login']['forms']['login_l'];?><input type="text" name="login"></label>
+<label><?php print $items['pages']['login']['forms']['password_l'];?><input type="password" name="password"></label>
+<input type="checkbox" name="auto" value="1"><?php print $items['pages']['login']['forms']['avto_l'];?><br>
+<input type="submit" value="<?php print $items['pages']['login']['forms']['enter_l'];?>" name="form1">
 </form>
 <?php
 	}
 ?>
 </div>
 <?php
+    include ("block/lang.block.php");
 	include("footer.inc.php");
 ?>
 </body>

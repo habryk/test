@@ -11,57 +11,7 @@
         $sessRow = sql_query($sessLog,$sess_opt);
         $_SESSION['permission'] = $sessRow[0];
     }     
-    include ("lang.inc.php");	
-    if (isset($_POST['form2'])) {
-        if (!empty($_POST['title_en']) && !empty($_POST['text_en']) && !empty($_POST['title_ua']) && !empty($_POST['text_ua'])){
-        clearData($_POST['title_en']);
-        clearData($_POST['text_en']);
-        clearData($_POST['title_ua']);
-        clearData($_POST['text_ua']);
-        $date = time();
-        $sql = "INSERT INTO news(title,author,text,lang,date) VALUES (?,?,?,?,?)";
-        $options_en = array($_POST['title_en'],$_SESSION['id'],$_POST['text_en'],$_POST['lang_en'],$date);
-        $options_ua = array($_POST['title_ua'],$_SESSION['id'],$_POST['text_ua'],$_POST['lang_ua'],$date);
-        try{
-            $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            $db->beginTransaction();
-            $query1 = $db->prepare($sql);
-            $query1->execute($options_en);
-            $query2 = $db->prepare($sql);
-            $query1->execute($options_ua);
-            if (!$query1 || !$query2){
-                $db->rollBack();               
-            }
-            else{
-                $db->commit(); 
-            }
-        }
-        catch(PDOException $e){
-            $result = "Извините произошла ошибка \"".$e->getMessage()."\" в строке ";
-                $result .= $e->getLine();
-                $result .= " в файле ";
-                $result .= $e->getFile();
-                echo $result;
-        }
-        }
-        else echo $items['pages']['news']['fields_error'];
-    }
-    if (isset($_POST['form3'])) {
-         if (!empty($_POST['title']) && !empty($_POST['text'])){
-            clearData($_POST['text']);
-            clearData($_POST['title']);
-            $date = time();
-            $sql = "UPDATE news SET title=?,text=?,date=? WHERE id=?";
-            $option = array($_POST['title'],$_POST['text'],$date,$_POST['id']);
-            $result = sql_query($sql,$option,true);
-            if ($result){
-            echo "<html><head><meta http-equiv='Refresh' content='3; URL=news.php?id=".$_POST['id']."'></head>".$items['pages']['news']['success_edit']."</html>";
-            }
-            else echo $items['pages']['news']['update_error'];
-         }
-         else echo $items['pages']['news']['fields_error'];
-    }
-    
+    include ("lang.inc.php");   
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -77,22 +27,72 @@ include ("block/login.block.php");
 ?>
 <div class="content">
 <?php
+if (isset($_POST['form2'])) {
+        clearData($_POST['title_en']);
+        clearData($_POST['text_en']);
+        clearData($_POST['title_ua']);
+        clearData($_POST['text_ua']);
+        if (!empty($_POST['title_en']) && !empty($_POST['text_en']) && !empty($_POST['title_ua']) && !empty($_POST['text_ua'])){       
+        $date = time();
+        $sql = "INSERT INTO news(title,author,text,lang,date) VALUES (?,?,?,?,?)";
+        $options_en = array($_POST['title_en'],$_SESSION['id'],$_POST['text_en'],$_POST['lang_en'],$date);
+        $options_ua = array($_POST['title_ua'],$_SESSION['id'],$_POST['text_ua'],$_POST['lang_ua'],$date);
+        try{
+            $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $db->beginTransaction();
+            $query1 = $db->prepare($sql);
+            $query1->execute($options_en);
+            $query2 = $db->prepare($sql);
+            $query2->execute($options_ua);
+            if (!$query1 || !$query2){
+                $db->rollBack();               
+            }
+            else{
+                $db->commit(); 
+            }
+        }
+        catch(PDOException $e){
+            $result = "Извините произошла ошибка \"".$e->getMessage()."\" в строке ";
+                $result .= $e->getLine();
+                $result .= " в файле ";
+                $result .= $e->getFile();
+                echo $result;
+        }
+        }
+        else echo $items['pages']['news']['fields_error_n'];
+    }
+    if (isset($_POST['form3'])) {
+            clearData($_POST['text']);
+            clearData($_POST['title']);
+         if (!empty($_POST['title']) && !empty($_POST['text'])){
+            $date = time();
+            $sql = "UPDATE news SET title=?,text=?,date=? WHERE id=?";
+            $option = array($_POST['title'],$_POST['text'],$date,$_POST['id']);
+            $result = sql_query($sql,$option,true);
+            if ($result){
+            echo "<html><head><meta http-equiv='Refresh' content='3; URL=news.php?id=".$_POST['id']."'></head>".$items['pages']['news']['success_edit_n']."</html>";
+            }
+            else echo $items['pages']['news']['update_error_n'];
+         }
+         else echo $items['pages']['news']['fields_error_n'];
+    }
+
 if ($_GET['action'] == "add"){
 ?>
     <form action="news.php" method="POST">
     <fieldset>
-    <legend>English</legend>
-    <label><?php print $items['forms']['title'];?><input type="text" name="title_en" maxlength="50" ></label><br>
-    <label><?php print $items['forms']['text'];?><textarea name="text_en"></textarea></label>
+    <legend><?php print $items['pages']['news']['forms']['legent_en_n'];?></legend>
+    <label><?php print $items['pages']['news']['forms']['title_n'];?><input type="text" name="title_en" maxlength="50" ></label><br>
+    <label><?php print $items['pages']['news']['forms']['text_n'];?><textarea name="text_en"></textarea></label>
     <input type="hidden" name="lang_en" value="en">
     </fieldset>
     <fieldset>
-    <legend>Ukraine</legend>
-    <label><?php print $items['forms']['title'];?><input type="text" name="title_ua" maxlength="50" ></label><br>
-    <label><?php print $items['forms']['text'];?><textarea name="text_ua"></textarea></label>  
+    <legend><?php print $items['pages']['news']['forms']['legent_ua_n'];?></legend>
+    <label><?php print $items['pages']['news']['forms']['title_n'];?><input type="text" name="title_ua" maxlength="50" ></label><br>
+    <label><?php print $items['pages']['news']['forms']['text_n'];?><textarea name="text_ua"></textarea></label>  
     <input type="hidden" name="lang_ua" value="ua">
     </fieldset>
-    <input type="submit" value="<?php print $items['button']['addnew'];?>" name="form2">
+    <input type="submit" value="<?php print $items['pages']['news']['forms']['addnew_button_n'];?>" name="form2">
     </form>
 <?php
 }
@@ -103,17 +103,17 @@ elseif($_GET['action'] == "edit" && isset($_GET['new'])){
     if ($_SESSION['id'] == $myrow['author'] || $_SESSION['permission'] == 1){
 ?>
     <form action="news.php" method="POST">
-    <label><?php print $items['forms']['title'];?><input type="text" name="title" value="<?php print $myrow['title'];?>"></label><br>
-    <label><?php print $items['forms']['text'];?><textarea name="text"><?php print $myrow['text'];?></textarea></label>
+    <label><?php print $items['pages']['news']['forms']['title_n'];?><input type="text" name="title" value="<?php print $myrow['title'];?>"></label><br>
+    <label><?php print $items['pages']['news']['forms']['text_n'];?><textarea name="text"><?php print $myrow['text'];?></textarea></label>
     <input type="hidden" name="id" value="<?php print $_GET["new"];?>">
-    <input type="submit" value='<?php print $items['button']['editnew'];?>' name='form3'>
+    <input type="submit" value='<?php print $items['pages']['news']['forms']['editnew_button_n'];?>' name='form3'>
     </form>
 <?php
 }
-else echo $items['pages']['news']['permission_error'];
+else echo $items['pages']['news']['permission_error_n'];
 }
 elseif (isset($_GET['id'])){
-    if (!is_numeric($_GET['id'])) echo $items['pages']['news']['url_error'];
+    if (!is_numeric($_GET['id'])) echo $items['pages']['news']['url_error_n'];
     else{
         $sql = "SELECT n.title,n.author,u.login,n.text,n.date FROM news n INNER JOIN users u ON n.author=u.id WHERE n.id = ?";
         $option = array($_GET['id']);
@@ -121,12 +121,12 @@ elseif (isset($_GET['id'])){
         $date = date("Y-m-d H:i:s",$myrow['date']);
 ?>
         <h1><?php print $myrow['title'];?></h1>
-        <h3><?php print $items['forms']['author'].$myrow['login'];?></h3>
+        <h3><?php print $items['pages']['news']['forms']['author_n'].$myrow['login'];?></h3>
         <p><?php print $myrow['text'];?></p>
-        <span><?php print $items['forms']['date'].$date;?></span><br>
+        <span><?php print $items['pages']['news']['forms']['date_n'].$date;?></span><br>
         
 <?php  
-if(!empty($_SESSION['login']) && !empty($_SESSION['password']) && $_SESSION['permission'] == 1 ||  $_SESSION['id'] == $myrow['author'] && $_SESSION['permission'] == 2) echo "<a href='news.php?action=edit&new=".$_GET['id']."'>".$items['menu']['editnew']."</a>/<a href='news.php?action=del&new=".$_GET['id']."'>".$items['menu']['delete']."</a>";   
+if(!empty($_SESSION['login']) && !empty($_SESSION['password']) && $_SESSION['permission'] == 1 ||  $_SESSION['id'] == $myrow['author'] && $_SESSION['permission'] == 2) echo "<a href='news.php?action=edit&new=".$_GET['id']."'>".$items['pages']['news']['forms']['editnew_n']."</a>/<a href='news.php?action=del&new=".$_GET['id']."'>".$items['pages']['news']['forms']['delete_n']."</a>";   
     }
 }
 elseif($_GET['action'] == "del" && isset($_GET['new'])){
@@ -134,7 +134,7 @@ elseif($_GET['action'] == "del" && isset($_GET['new'])){
     $option = array($_GET['new']);
     $result = sql_query($sql,$option,true);
     if ($result){
-        echo $items['pages']['news']['success_delete'];
+        echo $items['pages']['news']['success_delete_n'];
     }
 }
 	else{
@@ -146,14 +146,14 @@ elseif($_GET['action'] == "del" && isset($_GET['new'])){
                 $obj->execute($options);
                 if ($obj->rowCount() > 0){
                     echo "<ul>";
-                while($myrow = $obj->fetch(PDO::FETCH_ASSOC)){
+                while($myrow = $obj->fetch()){
                     $text = stingcut($myrow['text'],150);
-                    printf("<li><h2><a href='news.php?id=%s'>%s</a></h2><p>%s</p><a href='news.php?id=%s'>%s</a></li>",$myrow['id'],$myrow['title'],$text,$myrow['id'],$items['menu']['more']);               
+                    printf("<li><h2><a href='news.php?id=%s'>%s</a></h2><p>%s</p><a href='news.php?id=%s'>%s</a></li>",$myrow['id'],$myrow['title'],$text,$myrow['id'],$items['pages']['news']['forms']['more_n']);               
                 }
                 echo "</ul>";
                 }
                 else{
-                echo $items['pages']['news']['news_error'];
+                echo $items['pages']['news']['news_error_n'];
                 }
        }
        catch(PDOException $e){
@@ -164,12 +164,13 @@ elseif($_GET['action'] == "del" && isset($_GET['new'])){
                 echo $result;
                 file_put_contents('PDOErrors.txt', $result."\n", FILE_APPEND);
        }
-       if(!empty($_SESSION['login']) && !empty($_SESSION['password']) && $_SESSION['permission'] == 1 || $_SESSION['permission'] == 2) echo "<a href='news.php?action=add'>".$items['menu']['addnew']."</a>";
+       if(!empty($_SESSION['login']) && !empty($_SESSION['password']) && $_SESSION['permission'] == 1 || $_SESSION['permission'] == 2) echo "<a href='news.php?action=add'>".$items['pages']['news']['forms']['addnew_n']."</a>";
        }
 
 ?>
 </div>
 <?php
+include ("block/lang.block.php");
 	include("footer.inc.php");
 ?>
 </body>
