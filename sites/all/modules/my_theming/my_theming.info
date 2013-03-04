@@ -1,0 +1,5 @@
+;$Id$
+name = My Theming
+description = Work with theme function
+core = 7.x
+version = 7.x-1.0

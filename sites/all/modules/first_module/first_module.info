@@ -1,0 +1,5 @@
+; $Id$
+name = My Module
+description = Create some pages, blocks
+version = "7.x-1.0"
+core = 7.x

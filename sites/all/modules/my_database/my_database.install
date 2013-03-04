@@ -1,0 +1,42 @@
+<?php
+function my_database_schema(){
+  $schema['news'] = array(
+    // example (partial) specification for table "node"
+    'description' => 'The base table for nodes.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a node.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'number' => array(
+        'description' => 'The current number version identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'teaser' => array(
+        'description' => 'The teaser of this node.',
+        'type' => 'varchar',
+        'length' => 150,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'text' => array(
+        'description' => 'The text of this node.',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
+ function my_database_install(){
+ 	drupal_install_schema('my_database');
+ }
+ function my_database_uninstall(){
+ 	drupal_uninstall_schema('my_database');
+ }

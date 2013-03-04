@@ -1,0 +1,68 @@
+<?php
+function first_module_menu(){
+	$items = array();
+	$items['homepage'] = array(
+	'title' => t('Home page'),
+	'page callback' => array('my_view_page'),
+	'access arguments' => array('access content'),
+	);
+
+	$items['error_403'] = array(
+	'title' => t('Access denied'),
+	'page callback' => array('my_view_page'),
+	'access callback' => array(true),
+	);
+
+	$items['error_404'] = array(
+	'title' => t('Page not found'),
+	'page callback' => array('my_view_page'),
+	'access callback' => array(true),
+	);
+	return $items;
+}
+function my_view_page(){
+$page = arg(0);
+switch($page){
+	case 'homepage':
+	$out = t('You are on a fron page.');
+	break;
+	case 'error_403':
+	$out = t('Access to view this page is denied.');
+	break;
+	case 'error_404':
+	$out = t('Page not found. Try later.');
+}
+	
+	return $out;
+}
+
+function first_module_permission(){
+	return array ('access_content' => array(
+					'title' => t('Access to content'),
+					'description' => t('Only administrator have access to page'),
+					),);
+}
+
+function first_module_block_info(){
+	$blocks['newblock'] = array(
+    'info' => t('New Block!!!'),
+  );
+  return $blocks;
+}
+
+function first_module_block_view($delta = ''){
+	$block = array();
+	switch($delta){
+		case 'newblock':
+			 $block['subject'] = t('New Block');
+			 if (user_access('access_content')){
+      		 $block['content'] = t('Block content.');
+			}
+	else {
+			$block['content'] = t('Access to view this content is denied.');
+	     }
+	}
+	return $block;
+}
+
+

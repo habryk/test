@@ -1,0 +1,5 @@
+;$Id$
+name = My Database
+description = Create new table
+core = 7.x
+version = 7.x
