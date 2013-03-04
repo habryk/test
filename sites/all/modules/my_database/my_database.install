@@ -1,6 +1,6 @@
 <?php
 function my_database_schema(){
-  $schema['news'] = array(
+  $schema['my_database'] = array(
     // example (partial) specification for table "node"
     'description' => 'The base table for nodes.',
     'fields' => array(
@@ -34,9 +34,9 @@ function my_database_schema(){
   );
   return $schema;
 }
- function my_database_install(){
- 	drupal_install_schema('my_database');
- }
- function my_database_uninstall(){
- 	drupal_uninstall_schema('my_database');
- }
+function my_database_install(){
+	drupal_install_schema('my_database');
+}
+function my_database_uninstall(){
+	drupal_uninstall_schema('my_database');
+}
