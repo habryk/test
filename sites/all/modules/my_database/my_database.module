@@ -1,0 +1,213 @@
+<?php
+/**
+ * @file: my_database.module
+ * Create table in db
+ */
+
+/**
+ * Implements hook_menu().
+ */			
+function my_database_menu() {
+	$items = array();
+	$items['insert'] = array(
+		'title' => t('Insert in database'),
+		'page callback' => 'myform',
+		'access callback' => TRUE,	
+	);
+	$items['table'] = array(
+		'title' => t('Table'),
+		'page callback' => 'table_create',
+		'access callback' => TRUE,
+	);
+	$items['delete'] = array(
+		'title' => t('Confirm delete'),
+		'page callback' => 'delete_confirm',
+		'access callback' => TRUE,
+	);
+
+	return $items;
+}
+
+/**
+ * Implements hook_form().
+ */
+function my_database_form($form, &$form_state){
+	$page = arg(0);
+	$forms = array();
+	$def = array(
+		'number' => NULL,
+		'teaser' => NULL,
+		'text' => NULL,
+	);
+	// Set defualt value for forms.
+	if (isset($_GET['id']) && isset($_GET['action']) && $_GET['action'] == 'edit') {
+		$result = db_select('my_database', 'm')
+			->fields('m')
+			->condition('id',$_GET['id'])
+			->execute()
+			->fetchAssoc();
+	  foreach($result as $key=>$value) {
+		  $def[$key] = $value;
+	  }
+	}
+	if ($page == 'insert') {
+		$forms['number'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Number'),
+			'#maxlength' => 10,
+			'#size' => 40,
+			'#required' => TRUE,
+			'#default_value' => $def['number'],
+		);
+		$forms['teaser'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Teaser'),
+			'#maxlength' => 150,
+			'#size' => 40,
+			'#required' => TRUE,
+			'#default_value' => $def['teaser'],
+		);
+		$forms['text'] = array(
+			'#type' => 'textarea',
+			'#title' => t('Text'),
+			'#required' => TRUE,
+			'#default_value' => $def['text'],
+		);
+		$forms['submit'] = array(
+			'#type' => 'submit',
+			'#value' => t('Send'),
+			'#suffix' => '<br>', 
+		);
+		$forms['link'] = array(
+			'#markup' => l('Show result', 'table'),
+		);
+	}
+	else {
+		// Confirm delete node.
+		$forms['confirm'] = array(
+			'#markup' => t('Are you sure?'),
+			'#suffix' => '<br>', 
+		);
+		$forms['submit_delete'] = array(
+			'#type' => 'submit',
+			'#value' => t('Yes'),
+		);
+		$forms['cancel'] = array(
+			'#markup' => l('No', 'table'),
+		);
+	}
+
+	return $forms;
+}
+
+/**
+ * Page callback hook_menu().
+ * Render form.
+ */
+function myform(){
+	return (drupal_get_form('my_database_form'));	
+}
+
+/**
+ * Page callback hook_menu().
+ * Render form with confirm delete.
+ */
+function delete_confirm(){
+	return (drupal_get_form('my_database_form'));	
+}
+
+/**
+ * Function validate.
+ */
+function my_database_form_validate($form, &$form_state) {
+	$page = arg(0);
+	if ($page == 'insert') {
+		//Validate the current number
+		if (!is_numeric($form_state['values']['number']) || strlen($form_state['values']['number']) > 10){
+			form_set_error('number', 'Please enter a valid phone number.');
+		}
+		//Validate the current teaser 
+		if (strlen($form_state['values']['teaser']) > 150) {
+			form_set_error('teaser', 'Your teaser to long.');
+		}
+	}
+}
+
+/**
+ * Submit for insert, delete and update table
+ */
+function my_database_form_submit($form, &$form_state){
+	$page = arg(0);
+	if ($page == 'delete') {
+		$result = db_delete('my_database')
+			->condition('id',$_GET['id'])
+			->execute();
+		if ($result) {
+			$form = drupal_set_message('Data was deleted.');
+			$form_state['redirect'] = array('table');
+		}
+	}
+	else {
+		if (isset($_GET['id']) && $_GET['action'] == 'edit') {
+			$result = db_update('my_database')
+				->fields(array(
+						'number' => $form_state['values']['number'],
+						'teaser' => $form_state['values']['teaser'],
+						'text' => $form_state['values']['text'],
+					)
+				)
+			  ->condition('id', $_GET['id'])
+			  ->execute();
+		}
+		else {
+			$result = db_insert('my_database')
+				->fields(array(
+						'number' => $form_state['values']['number'],
+						'teaser' => $form_state['values']['teaser'],
+						'text' => $form_state['values']['text'],
+          )
+        )
+        ->execute();		
+		}
+		if ($result) {
+			drupal_set_message(t('Data was insert.'));
+		}
+	}	
+}
+
+/**
+ * Select rows from database and create a table.
+ */
+function table_create() {
+	$result = db_select('my_database', 'm')
+		->fields('m')
+		->orderBy('m.id', 'ASC')
+		->execute()
+		->fetchAll();
+	foreach ($result as $table_row) {
+		$rows[] = array(
+			array('data' => $table_row->number, 'width' => 100),
+			array('data' => $table_row->teaser, 'width' => 150),
+			array('data' => $table_row->text, 'width' => 150),
+			array('data' => t("!edit / !delete", array('!edit' => l('edit',"insert", array(
+																							'query' => array(
+																									'action' => 'edit',
+																									'id' => $table_row->id)
+																							)),
+													   										'!delete' => l('delete',"delete", array(
+																									'query' => array(
+																									'id' => $table_row->id)
+															   									))
+													   										)
+											), 'width' => 100),
+		);
+	}
+	$header = array(
+		array('data' => t('Number')),
+		array('data' => t('Teaser')),
+		array('data' => t('Text')),
+		array('data' => t('Actions')),
+	);
+
+	return theme('table', array('header' => $header, 'rows' => $rows));
+}

@@ -1,33 +1,44 @@
 <?php
-function my_theming_menu(){
+/**
+ * @file: my_theming.module
+ * Create new theme function, table and fieldset
+ */
+
+/**
+*Implements hook_menu().
+*/
+function my_theming_menu() {
 	$items = array();
 	$items['theming'] = array(
 		'title' => t('Theming'),
 		'page callback' => 'my_theme_func',
 		'access callback' => true,
-		);
+	);
 	$items['tpl'] = array(
 		'title' => t('Tpl'),
 		'page callback' => 'my_theme_func',
 		'access callback' => true,
-		);
+	);
+
 	return $items;
 }
 
+/**
+* Implements hook_theme().
+*/
 function my_theming_theme($existing, $type, $theme, $path) {
   return array(
     'example_theme' => array(
        'variables' => array(
         	'name' => NULL,
-      ),
-     ),
+        ),
+    ),
     'example_theme_tpl' => array(
     	'variables' => array(
     		'name' => NULL,
-    		),
-    	'template' => 'example_theme_tpl',
     	),
- 
+    	'template' => 'example_theme_tpl',
+    ),
   );
 }
 
@@ -36,23 +47,19 @@ function theme_example_theme($vars) {
 	return $out;
 }
 
-function theme_example_theme_tpl($vars) {
-	//return 'bu';
-	$out = $vars['name'];
-	return $vars;
-}
-
-
-function my_theme_func(){
+/**
+* Page callback hook_menu().
+*/
+function my_theme_func() {
 	$page = arg(0);
 	switch ($page) {
 		case 'theming':
-				$variables = array(
-				'items' => array('First','Second','Third'),
-				'title' => t('List'),
+			$variables = array(
+			  'items' => array('First','Second','Third'),
+			  'title' => t('List'),
 				'type' => 'ul',
 				'attributes' => array(),
-				);
+		  );
 			$theme_list = theme('item_list', $variables);
 			$variables_image = array(
 				'style_name' => 'my_theming',
@@ -65,66 +72,65 @@ function my_theme_func(){
 			);
 			$theme_image = theme('image_style', $variables_image);
 			$variables_table = array(
-				'header' => array(array('data' => t('Name')),
-								  array('data' => t('Surname')),
-								  array('data' => t('E-mail')),
-								  array('data' => t('Skype')),
-								),
-				'rows' => array(array('Gek',array('data' => 'Habryk'),'habryk@mail.ru','habryk'),
-								array('Vasia','Pypkin','vasia@mail.ru','vasia'),
-						  		),
+				'header' => array(
+					array('data' => t('Name')),
+					array('data' => t('Surname')),
+					array('data' => t('E-mail')),
+					array('data' => t('Skype')),
+				),
+				'rows' => array(
+					array('Gek',array('data' => 'Habryk'),'habryk@mail.ru','habryk'),
+					array('Vasia','Pypkin','vasia@mail.ru','vasia'),
+				),
 				'attributes' => array(),
 				'caption' => t('My table'),
 				'empty' => t('No rows in table'),
 				'sticky' => array(),
 				'colgroups' => array(),
-				);
+			);
 			$theme_table = theme('table',$variables_table);
 			drupal_add_library('system', 'drupal.collapse');
 			$variable_fieldset_table = array(
 				'element' => array(
-									'#title' => t('Theme table'),
-									'#children' => $theme_table,
-									'#collapsible' => true,
-									'#collapsed' => FALSE,
-									'#attributes' => array(
-															'class' => array('collapsible','collapsed')
-														  ),
-									)
-				);
+					'#title' => t('Theme table'),
+					'#children' => $theme_table,
+					'#collapsible' => true,
+					'#collapsed' => FALSE,
+					'#attributes' => array(
+						'class' => array('collapsible','collapsed')
+					),
+				),
+			);
 			$variable_fieldset_list = array(
 				'element' => array(
-									'#title' => t('Theme list'),
-									'#children' => $theme_list,
-									'#collapsible' => false,
-									'#collapsed' => false,
-									'#attributes' => array(
-															'class' => array('collapsible','collapsed')
-														  ),
-									)
-				);
+					'#title' => t('Theme list'),
+					'#children' => $theme_list,
+					'#collapsible' => false,
+					'#collapsed' => false,
+					'#attributes' => array(
+						'class' => array('collapsible')
+					),
+				),
+			);
 			$variable_fieldset_image = array(
 				'element' => array(
-									'#title' => t('Theme image'),
-									'#children' => $theme_image,
-									'#collapsible' => true,
-									'#collapsed' => FALSE,
-									'#attributes' => array(
-															'class' => array('collapsible','collapsed')
-														  ),
-									)
-				);
+					'#title' => t('Theme image'),
+					'#children' => $theme_image,
+					'#collapsible' => true,
+					'#collapsed' => FALSE,
+					'#attributes' => array(
+						'class' => array('collapsible','collapsed'),
+					),
+				),
+			);
 			$theme_fieldset  = theme('fieldset', $variable_fieldset_table);
 			$theme_fieldset .= theme('fieldset', $variable_fieldset_list);
 			$theme_fieldset .= theme('fieldset', $variable_fieldset_image);
-
-			//$out = theme('example_theme',array('name' => 'Habryk'));
-			
+			// Render all theme components.
 			$output = $theme_list.$theme_image.$theme_table.$theme_fieldset;
 			break;
 	 	case 'tpl':
-	 		$output = theme('example_theme_tpl', array('name' => 'Habryk1'));
-	 		
+	 		$output = theme('example_theme_tpl', array('name' => 'Habryk1')); 		
 	}
 	return $output;
 }

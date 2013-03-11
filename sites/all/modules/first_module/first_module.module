@@ -1,68 +1,169 @@
 <?php
-function first_module_menu(){
-	$items = array();
-	$items['homepage'] = array(
-	'title' => t('Home page'),
-	'page callback' => array('my_view_page'),
-	'access arguments' => array('access content'),
-	);
+/*
+* @file: first_module.module
+* Create homepage, page with errors 403, 404
+* Create block with access
+**/
 
-	$items['error_403'] = array(
-	'title' => t('Access denied'),
-	'page callback' => array('my_view_page'),
-	'access callback' => array(true),
-	);
+/*
+* Implement hook_menu().
+**/
+function first_module_menu() {
+  $items = array();
 
-	$items['error_404'] = array(
-	'title' => t('Page not found'),
-	'page callback' => array('my_view_page'),
-	'access callback' => array(true),
-	);
-	return $items;
-}
-function my_view_page(){
-$page = arg(0);
-switch($page){
-	case 'homepage':
-	$out = t('You are on a fron page.');
-	break;
-	case 'error_403':
-	$out = t('Access to view this page is denied.');
-	break;
-	case 'error_404':
-	$out = t('Page not found. Try later.');
-}
-	
-	return $out;
+  $items['homepage'] = array(
+  'title' => t('Homepage'),
+  'page callback' => 'my_view_page',
+  'access arguments' => array('access content'),
+  );
+
+  $items['error_403'] = array(
+  'title' => t('Access denied'),
+  'page callback' => 'my_view_page',
+  'access callback' => TRUE,
+  );
+
+  $items['error_404'] = array(
+  'title' => t('Page not found'),
+  'page callback' => 'my_view_page',
+  'access callback' => TRUE,
+  );
+
+  $items['xml'] = array(
+  'title' => t('BBC News'),
+  'page callback' => 'my_view_page',
+  'access callback' => TRUE,
+  );
+  $items['get_xml'] = array(
+    'title' => t('RSS'),
+    'page callback' => 'my_view_page',
+    'access callback' => TRUE,
+  );
+
+  return $items;
 }
 
-function first_module_permission(){
-	return array ('access_content' => array(
-					'title' => t('Access to content'),
-					'description' => t('Only administrator have access to page'),
-					),);
+/*
+* Page callback for hook_menu().
+**/
+function first_module_theme() {
+  return array(
+    'xml_themes' => array(
+       'variables' => array(
+          'title' => NULL,
+          'description' => NULL,
+          'link' => NULL,
+          'pubDate' => NULL,
+        ),
+    ),
+    'get_xml_themes' =>array(
+      'variables' => array(
+        'title' => NULL,
+        'description' => NULL,
+        'link' => NULL,
+        'film' => NULL,
+      ),
+    ),
+  );
 }
 
-function first_module_block_info(){
-	$blocks['newblock'] = array(
+function theme_xml_themes($vars) {
+  $out = "<h1><a href='" . $vars['link'] . "'>" . $vars['title'] . "</a></h1>";
+  $out .= "<p>" . $vars['pubDate'] . "</p>";
+  $out .= "<h3>" . $vars['description'] . "</h3>";
+  return $out;
+}
+
+function theme_get_xml_themes($vars) {
+  $out = "<title>" . $vars['title'] . "</title>";
+  $out .= "<description>" . $vars['description'] . "</description>";
+  $out .= "<link>" . $vars['link'] . "</link>";
+  $out .= "<film>" . $vars['film'] . "</film>";
+  return $out;
+}
+
+/*
+* Page callback for hook_menu().
+**/
+function my_view_page() {
+  $page = arg(0);
+  switch ($page) {
+    case 'homepage':
+      $out = t('You are on a fron page.');
+      break;
+    case 'error_403':
+      $out = t('Access to view this page is denied.');
+      break;
+    case 'error_404':
+      $out = t('Page not found. Try later.');
+      break;
+    case 'xml' :
+      $xml = simplexml_load_file("http://feeds.bbci.co.uk/news/rss.xml");
+      $xml = (array) $xml->channel;
+      $out = '';
+      foreach($xml['item'] as $items) {
+        $out .= theme('xml_themes', array(
+          'title' => $items->title,
+          'description' => $items->description,
+          'link' => $items->link,
+          'pubDate' => $items->pubDate,
+        ));
+      }
+      break;
+    case 'get_xml':
+      drupal_add_http_header('Content-Type', 'application/xml; utf-8');
+      $out = theme('get_xml_themes', array(
+          'title' => 'Text Title',
+          'description' => 'Description',
+          'link' => 'link',
+          'film' => 'Film Name',
+        ));
+      break;
+  }
+
+  return $out;
+}
+
+/*
+* Impleent hook_permission().
+**/
+function first_module_permission() {
+  return array (
+    'access_content' => array(
+    'title' => t('Access to block content'),
+    'description' => t('Show content for user'),
+     ),
+  );
+}
+
+/*
+* Impleent hook_block_info().
+**/
+function first_module_block_info() {
+  $blocks['newblock'] = array(
     'info' => t('New Block!!!'),
   );
+
   return $blocks;
 }
 
-function first_module_block_view($delta = ''){
-	$block = array();
-	switch($delta){
-		case 'newblock':
-			 $block['subject'] = t('New Block');
-			 if (user_access('access_content')){
-      		 $block['content'] = t('Block content.');
-			}
-	else {
-			$block['content'] = t('Access to view this content is denied.');
-	     }
-	}
-	return $block;
+/*
+* Impleent hook_block().
+**/
+function first_module_block_view($delta = '') {
+  $block = array();
+  switch($delta){
+    case 'newblock':
+      $block['subject'] = t('New Block');
+      if (user_access('access_content')) {
+        $block['content'] = t('Block content.');
+      }
+      else {
+        $block['content'] = t('Access to view this content is denied.');
+      }
+  }
+
+  return $block;
 }
 
 

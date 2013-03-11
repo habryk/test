@@ -1,7 +1,14 @@
 <?php
-function my_database_schema(){
+/**
+ * @file: my_database.install
+ * Create table in db
+ */
+
+/**
+* Implement hook_schema
+*/
+function my_database_schema() {
   $schema['my_database'] = array(
-    // example (partial) specification for table "node"
     'description' => 'The base table for nodes.',
     'fields' => array(
       'id' => array(
@@ -32,11 +39,15 @@ function my_database_schema(){
     ),
     'primary key' => array('id'),
   );
+
   return $schema;
 }
+
+/**
+* Create new table.
+*/
 function my_database_install(){
-	drupal_install_schema('my_database');
-}
-function my_database_uninstall(){
-	drupal_uninstall_schema('my_database');
+  if (!db_table_exists('my_database')) {
+	 drupal_install_schema('my_database');
+  }
 }

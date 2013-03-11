@@ -13,43 +13,58 @@ function my_theme_preprocess_html(&$vars) {
   $vars['classes_array'][] = 'show-grid';
   $path = path_to_theme();
   drupal_add_css($path.'/style.css');
- // drupal_set_message('<pre><strong>debug:</strong></pre><pre>' . print_r(request_uri(), 1) . '</pre>');
 }
+
+/**
+ * Implements hook_preprocess_node.
+ * Change title "Genre".
+ */
 function my_theme_preprocess_node(&$vars) {
-  
+  if ($vars['node']->type == 'new_type'){
+    $vars['content']['field_genre']['#title'] = t('Category');
+  }
 }
-/*function classes_preprocess_views_view_field(&$vars) {
-  global $user;
-  switch ($vars['view']->name) {
-    case 'my_tutors_adt':
-      if ($vars['view']->current_display == 'page') {
-        if ($vars['field']->options['id'] == 'title' || $vars['field']->options['id'] == 'view_node') {
-          $vars['output'] = l(strip_tags($vars['output']), 'node/' . $vars['row']->nid, array('query' => array('back' => $_GET['q'])));
-        }
-      }}}*/
-function my_theme_preprocess_views_view(&$vars){
-  //drupal_set_message('<pre><strong>debug:</strong></pre><pre>' . print_r($vars[''], 1) . '</pre>');
-  if ($vars['view']->name == 'films'){
+
+/**
+ * Implements hook_preprocess_block.
+ */
+function my_theme_preprocess_block(&$vars) {
+  if (arg(0) == 'get_xml') {
+    $vars['theme_hook_suggestions'][] = 'block__get_xml';
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view
+ */
+function my_theme_preprocess_views_view(&$vars) {
+  if ($vars['view']->name == 'films') {
     $function = 'my_theme_preprocess_views_view__'.$vars['view']->name;
     if (function_exists($function)) {
      $function($vars);
     }
   }
 }
+
+/**
+ * Implements hook_preprocess_views_view_field
+ * Change field "Read more" on "About film".
+ */
 function my_theme_preprocess_views_view_field(&$vars) {
   //drupal_set_message('<pre><strong>debug:</strong></pre><pre>' . print_r($vars['row']->nid, 1) . '</pre>');
-  if ($vars['view']->name == 'films'){
-    if ($vars['view']->current_display == 'page'){
-      if ($vars['field']->options['id'] == 'view_node'){
-        $vars['output'] = $vars['more'] = l(t('About film'),'node/'.$vars['row']->nid);
+  if ($vars['view']->name == 'films') {
+    if ($vars['view']->current_display == 'page') {
+      if ($vars['field']->options['id'] == 'view_node') {
+        $vars['output'] = l(t('About film'),'node/'.$vars['row']->nid);
       }
     }
   }
 }
 
 function my_theme_preprocess_views_view__films(&$vars){
-if ($vars['display_id'] == 'page'){
-  drupal_set_message('hi');  
+  if ($vars['display_id'] == 'page'){
+    //drupal_set_message("<h1>Geko's debug:</h1><pre>" . print_r(array_keys($vars), TRUE) . '</pre>');  
+    drupal_set_message('Hi');
   }
 }
 
@@ -57,10 +72,11 @@ if ($vars['display_id'] == 'page'){
  * Preprocessor for page.tpl.php template file.
  */
 function my_theme_preprocess_page(&$vars, $hook) { 
-  if (isset($vars['node'])){
-  if ($vars['node']->type == 'new_type') {
-    $vars['title'] = "\"Example template_preprocess_page\"";
-  }
+  //drupal_set_message("<h1>Geko's debug:</h1><pre>" . print_r(arg(0), TRUE) . '</pre>');
+  if (isset($vars['node'])) {
+    if ($vars['node']->type == 'new_type') {
+      $vars['title'] = "\"Example template_preprocess_page\"";
+    }
 }
   
   // For easy printing of variables.
